@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/link-brokerage.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/link-brokerage",
+      "dest": "api/link-brokerage.js"
+    }
+  ]
+}
