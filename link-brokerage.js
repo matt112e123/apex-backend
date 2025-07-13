@@ -2,7 +2,7 @@ const axios = require("axios");
 
 exports.handler = async function (event, context) {
   try {
-    const response = await axios.post(
+    const response = await axios.get(
       "https://api.snaptrade.com/api/v1/snapTrade/authorize",
       {
         userId: "'THE-APEX-INVESTOR-TEST-LCWOQ",
@@ -29,4 +29,4 @@ exports.handler = async function (event, context) {
       body: JSON.stringify({ error: "Something went wrong while linking your portfolio." })
     };
   }
-};
+}
