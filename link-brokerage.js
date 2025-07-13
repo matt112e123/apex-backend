@@ -1,33 +1,32 @@
-import axios from 'axios';
+const axios = require("axios");
 
-const CLIENT_ID = 'THE-APEX-INVESTOR-TEST-LCWOQ';
-const CONSUMER_KEY = 'cL3Joma3IF2OygJLOcKvTezOVuVLhMtOPexMkxDrGX0WyZIl3e';
-const BASE_URL = 'https://api.snaptrade.com/api/v1';
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', ['POST']);
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
-
-  const userId = 'user_' + Date.now();
-
+exports.handler = async function (event, context) {
   try {
-    await axios.post(`${BASE_URL}/snaptrade/registerUser`, { userId }, {
-      headers: { clientId: CLIENT_ID, consumerKey: CONSUMER_KEY }
-    });
-
-    const { data } = await axios.get(`${BASE_URL}/snaptrade/login`, {
-      params: {
-        userId,
-        redirectURI: 'https://theapexinvestor.net/linked',
+    const response = await axios.post(
+      "https://api.snaptrade.com/api/v1/snapTrade/authorize",
+      {
+        userId: "'THE-APEX-INVESTOR-TEST-LCWOQ",
+        clientId: "cL3Joma3IF2OygJLOcKvTezOVuVLhMtOPexMkxDrGX0WyZIl3e",
+        redirectUri: "https://eloquent-fairy-053ab2.netlify.app/callback"
       },
-      headers: { clientId: CLIENT_ID, consumerKey: CONSUMER_KEY }
-    });
+      {
+        headers: {
+          accept: "application/json",
+          "Content-Type": "application/json",
+          "X-API-KEY": "YOUR_SNAPTRADE_API_KEY"
+        }
+      }
+    );
 
-    return res.status(200).json({ url: data.url, userId });
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ url: response.data.url })
+    };
   } catch (error) {
-    console.error('Error in SnapTrade API:', error.response?.data || error.message);
-    return res.status(500).json({ error: 'Error creating link' });
+    console.error("Error linking brokerage:", error.message, error.response?.data);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: "Something went wrong while linking your portfolio." })
+    };
   }
-}
+};
