@@ -1,7 +1,7 @@
 const axios = require('axios');
 
 exports.handler = async (event, context) => {
-  if (event.httpMethod !== 'POST') {
+  if (event.httpMethod !== 'GET') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
@@ -12,11 +12,10 @@ exports.handler = async (event, context) => {
 
   try {
     console.log('Registering user with userId:', userId);
-    const registerResponse = await axios.post(
-      `${BASE_URL}/snaptrade/registerUser`,
-      { userId },
-      { headers: { clientId: CLIENT_ID, consumerKey: CONSUMER_KEY } }
-    );
+    const registerResponse = await axios.get(`${BASE_URL}/snaptrade/registerUser`, {
+      params: { userId },
+      headers: { clientId: CLIENT_ID, consumerKey: CONSUMER_KEY }
+    });
     console.log('User registration response:', registerResponse.data);
 
     console.log('Requesting login URL...');
