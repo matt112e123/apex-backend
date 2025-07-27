@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/sign-in", "destination": "/sign-in.html" },
+    { "source": "/sign-up", "destination": "/sign-up.html" },
+    { "source": "/apex-tool", "destination": "/apex-tool.html" }
+  ]
+}

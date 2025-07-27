@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log In | The Apex</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+            background-color: #000 !important; /* Ensures black background */
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            position: relative;
+            display: flex; /* Added for centering the login container */
+            justify-content: center; /* Centers horizontally */
+            align-items: center;   /* Centers vertically */
+        }
+
+        /* Stronger, visible radial animation (S style) */
+        .animated-bg::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 200%;
+            height: 200%;
+            background-image: repeating-radial-gradient(circle, rgba(0, 255, 153, 0.15) 2px, transparent 10px);
+            animation: spin 30s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes spin {
+            from {
+                transform: rotate(0deg) translate(-25%, -25%);
+            }
+            to {
+                transform: rotate(360deg) translate(-25%, -25%);
+            }
+        }
+
+        .login-container {
+            position: relative;
+            z-index: 1;
+            max-width: 420px;
+            /* margin: auto; Removed as flexbox handles centering */
+            /* margin-top: 10vh; Removed as flexbox handles centering */
+            padding: 48px 36px;
+            border-radius: 18px;
+            background-color: rgba(18, 18, 18, 0.94);
+            box-shadow: 0 0 40px rgba(0, 255, 140, 0.1);
+        }
+
+        .login-container h2 {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #f6f6f6;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #aaa;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            background-color: #1b1b1b;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .input-group input:focus {
+            border-color: #00ff99;
+            outline: none;
+            background-color: #1f1f1f;
+        }
+
+        .checkbox {
+            font-size: 14px;
+            margin-bottom: 20px;
+            color: #888;
+        }
+
+        .checkbox input {
+            margin-right: 6px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.25s ease;
+        }
+
+        .btn-primary {
+            background-color: #00ff99;
+            color: #000;
+            border: none;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background-color: #00e68a;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid #555;
+            color: #ccc;
+            margin-bottom: 12px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #1f1f1f;
+        }
+
+        .btn-passkey {
+            background-color: transparent;
+            border: 1px solid #555;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-passkey:hover {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        .footer {
+            text-align: center;
+            font-size: 13px;
+            color: #777;
+            margin-top: 32px;
+        }
+
+        .footer a {
+            color: #00ff99;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Message box for success/error */
+        .message-box {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+            display: none; /* Hidden by default */
+        }
+
+        .message-box.success {
+            background-color: #28a745; /* Green for success */
+            color: white;
+        }
+
+        .message-box.error {
+            background-color: #dc3545; /* Red for error */
+            color: white;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            display: none; /* Hidden by default */
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #00ff99;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin-loader 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin-loader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+
+    <div class="login-container">
+        <h2>Log in to The Apex</h2>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" required />
+            </div>
+
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required />
+            </div>
+
+            <div class="checkbox">
+                <input type="checkbox" id="keep" />
+                <label for="keep">Keep me logged in</label>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="loginBtn">Log In</button>
+            <button type="button" class="btn btn-secondary">Help</button>
+            <button type="button" class="btn btn-passkey"><i class="fas fa-key"></i> Log in with passkeys</button>
+        </form>
+
+        <div class="loading-spinner" id="loadingSpinner"></div>
+        <div class="message-box" id="messageBox"></div>
+
+        <div class="footer">
+            <p>Not on The Apex? <a href="https://theapexinvestor.net/sign-up">Create an account</a></p>
+            <p>This site is protected by reCAPTCHA and the Google <a href="#">Privacy Policy</a>. Terms apply.</p>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import {
+            getAuth,
+            signInWithEmailAndPassword,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {
+            getFirestore
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Your web app's Firebase configuration (obtained from Firebase Console)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdIUF9wklnnSfIAeGlA3aw8UVCj0H0Vig",
+            authDomain: "the-apex-app.firebaseapp.com",
+            projectId: "the-apex-app",
+            storageBucket: "the-apex-app.firebasestorage.app",
+            messagingSenderId: "908808650183",
+            appId: "1:908808650183:web:8112f608dd48c8140e6de2",
+            // measurementId: "G-4Q1GNW9DSL" // Optional, if you're not using Analytics
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app); // Firestore is initialized but not directly used for login itself
+
+        let currentUserId = null;
+
+        // Monitor authentication state (optional for login page, but good practice)
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUserId = user.uid;
+                console.log("User is signed in:", currentUserId);
+                // Optionally, redirect if already logged in (uncomment if desired)
+                window.location.href = 'https://theapexinvestor.com/apex-tool';
+
+            } else {
+                currentUserId = null;
+                console.log("No user signed in.");
+            }
+        });
+
+        // Get form elements
+        const loginForm = document.getElementById('loginForm');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const loginBtn = document.getElementById('loginBtn');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const messageBox = document.getElementById('messageBox');
+
+        // Function to display messages
+        function showMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type}`; // Add type class (success/error)
+            messageBox.style.display = 'block'; // Show the message box
+        }
+
+        // Function to hide messages
+        function hideMessage() {
+            messageBox.style.display = 'none';
+            messageBox.textContent = '';
+            messageBox.className = 'message-box';
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Prevent default form submission
+
+            hideMessage(); // Clear previous messages
+            loginBtn.disabled = true; // Disable button during submission
+            loadingSpinner.style.display = 'block'; // Show spinner
+
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
+
+            if (!email || !password) {
+                showMessage("Please enter both email and password.", "error");
+                loginBtn.disabled = false;
+                loadingSpinner.style.display = 'none';
+                return;
+            }
+
+            try {
+                // Sign in user with Firebase Authentication
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                currentUserId = user.uid;
+                console.log("User logged in:", currentUserId);
+
+                showMessage("Login successful! Redirecting...", "success");
+                // Redirect to dashboard/home page after a short delay
+                setTimeout(() => {
+                    window.location.href = 'https://theapexinvestor.net/dashboard'; // Placeholder dashboard page
+                }, 1500);
+
+            } catch (error) {
+                console.error("Error logging in:", error);
+                let errorMessage = "Login failed. Please check your credentials.";
+
+                // More specific error messages from Firebase
+                if (error.code === 'auth/invalid-email') {
+                    errorMessage = "Invalid email address.";
+                } else if (error.code === 'auth/user-disabled') {
+                    errorMessage = "Your account has been disabled.";
+                } else if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = "Incorrect email or password.";
+                }
+
+                showMessage(errorMessage, "error");
+                loginBtn.disabled = false; // Re-enable button
+                loadingSpinner.style.display = 'none'; // Hide spinner
+            }
+        });
+    </script>
+</body>
+</html>
