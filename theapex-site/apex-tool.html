@@ -2654,18 +2654,36 @@ try {
     const userSecret = '5088d1fd-6fec-459b-8001-00fbd02cf46b';
 
     try {
-      const response = await fetch(`https://apex-backend-lovat.vercel.app/api/link-brokerage?userId=${encodeURIComponent(userId)}&userSecret=${encodeURIComponent(userSecret)}`);
+      const backendUrl = 'https://apex-backend-lovat.vercel.app/api/link-brokerage';
+
+      const response = await fetch(backendUrl, {
+        method: 'POST', // <--- CHANGED: Specify POST method
+        headers: {
+          'Content-Type': 'application/json' // <--- CHANGED: Set content type to JSON
+        },
+        body: JSON.stringify({ // <--- CHANGED: Send data as JSON in the body
+          userId: userId,
+          userSecret: userSecret
+        })
+      });
 
       const result = await response.json();
       console.log('✅ Backend response:', result);
 
-      if (result.url) {
-        window.location.href = result.url;
+      if (response.ok) { // Check if the response status is in the 200-299 range
+        if (result.url) {
+          window.location.href = result.url;
+        } else {
+          // If no URL but response was OK, maybe a success message is expected
+          alert(result.message || 'Broker connection successful, but no redirect URL received.');
+        }
       } else {
-        alert(result.error || 'No redirect URL received.');
+        // Handle non-OK responses (e.g., 400, 401, 500)
+        console.error('❌ Backend error response:', result);
+        alert(result.error || result.message || 'An unexpected error occurred while connecting your broker. Check console for details.');
       }
     } catch (error) {
-      console.error('❌ Error:', error);
+      console.error('❌ Error during fetch:', error);
       alert('An unexpected error occurred while connecting your broker.');
     }
   }
