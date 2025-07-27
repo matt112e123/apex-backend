@@ -1,45 +1,43 @@
 import { URL } from 'url';
 
 export default async function handler(req, res) {
-  // Add CORS headers here
+  // Set CORS headers here
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS'); // Only POST and OPTIONS
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-SnapTrade-Client-Id, X-SnapTrade-Client-Secret, Authorization');
 
   // Handle preflight OPTIONS request
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    return res.status(200).end(); // Respond with 200 OK for OPTIONS
   }
 
-  // Your frontend calls this backend endpoint with a GET request
-  if (req.method !== 'GET') {
-      return res.status(405).json({ error: 'Method Not Allowed. Use GET to call this backend endpoint' });
+  // Ensure it's a POST request for the main logic
+  if (req.method !== 'POST') { // <--- CRITICAL CHANGE: Expect POST
+      return res.status(405).json({ error: `Method '${req.method}' Not Allowed. Use POST to call this backend endpoint.` });
   }
-
-  // For debugging: see what original query parameters Vercel received
-  console.log('Received original query:', req.query);
 
   let userId, userSecret;
   try {
-    // Manually parse userId and userSecret from the full request URL
-    const requestUrl = new URL(req.url, `http://${req.headers.host}`);
-    userId = requestUrl.searchParams.get('userId');
-    userSecret = requestUrl.searchParams.get('userSecret');
-    // For debugging: confirm what was parsed
-    console.log('Manually parsed userId:', userId, 'userSecret:', userSecret);
+    // <--- CRITICAL CHANGE: Get userId and userSecret from the request BODY for POST
+    userId = req.body.userId;
+    userSecret = req.body.userSecret;
+
+    // For debugging: confirm what was received from the body
+    console.log('Received userId from body:', userId, 'userSecret from body:', userSecret);
+
   } catch (parseError) {
-    console.error('Error parsing URL manually:', parseError);
-    return res.status(500).json({ error: 'Failed to parse URL parameters.' });
+    console.error('Error parsing request body:', parseError);
+    return res.status(500).json({ error: 'Failed to parse request body.' });
   }
 
-  // If parsing failed, return an error to the frontend
+  // If parsing failed (e.g., body was not valid JSON or fields missing), return an error
   if (!userId || !userSecret) {
-    return res.status(400).json({ error: 'Missing userId or userSecret after manual parsing' });
+    return res.status(400).json({ error: 'Missing userId or userSecret in request body.' });
   }
 
   // Your SnapTrade API credentials
-  const clientId = 'THE-APEX-INVESTOR-TEST-LCWOQ';
-  const clientSecret = 'iV35ti80Zz4PdvxYeMToHKmiGHKolFOnjkGtA6SUJk38mHLRJf';
+  const clientId = 'THE-APEX-INVESTOR-TEST-LCWOQ'; // Make sure this is correct
+  const clientSecret = 'iV35ti80Zz4PdvxYeMToHKmiGHKolFOnjkGtA6SUJk38mHLRJf'; // Make sure this is correct
 
   try {
     // Call SnapTrade API:
@@ -69,6 +67,7 @@ export default async function handler(req, res) {
       data = JSON.parse(raw);
     } catch (err) {
       // If SnapTrade's response isn't valid JSON, return its raw content
+      console.error('SnapTrade returned non-JSON response:', raw);
       return res.status(500).json({ error: 'SnapTrade returned non-JSON response', raw });
     }
 
@@ -81,7 +80,7 @@ export default async function handler(req, res) {
           return res.status(snapRes.status).json({ error: data.detail, code: data.code, status_code: data.status_code });
       }
       // Generic error if no specific detail from SnapTrade
-      return res.status(400).json({ error: data.error || 'No redirect URI returned or unknown error from SnapTrade', raw });
+      return res.status(snapRes.status || 400).json({ error: data.error || 'No redirect URI returned or unknown error from SnapTrade', raw });
     }
 
   } catch (err) {
