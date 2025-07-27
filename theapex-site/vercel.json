@@ -1,7 +1,22 @@
 {
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Credentials", "value": "true" },
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET,DELETE,POST,PUT,OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, X-SnapTrade-Client-Id, X-SnapTrade-Client-Secret, Authorization" }
+      ]
+    }
+  ],
   "rewrites": [
     { "source": "/sign-in", "destination": "/sign-in.html" },
     { "source": "/sign-up", "destination": "/sign-up.html" },
-    { "source": "/apex-tool", "destination": "/apex-tool.html" }
+    { "source": "/apex-tool", "destination": "/apex-tool.html" },
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
   ]
 }
