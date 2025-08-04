@@ -1,42 +1,50 @@
-const axios = require('axios');
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', 'https://theapexinvestor.com');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-exports.handler = async (event, context) => {
-  if (event.httpMethod !== 'GET') {
-    return { statusCode: 405, body: 'Method Not Allowed' };
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
 
-  const userId = 'user_' + Date.now();
-  const CLIENT_ID = 'THE-APEX-INVESTOR-TEST-LCWOQ';
-  const CONSUMER_KEY = 'cL3Joma3IF2OygJLOcKvTezOVuVLhMtOPexMkxDrGX0WyZIl3e';
-  const BASE_URL = 'https://api.snaptrade.com/api/v1';
+  const { userId, userSecret } = req.method === 'GET' ? req.query : req.body;
+
+  if (!userId || !userSecret) {
+    return res.status(400).json({ error: 'Missing userId or userSecret' });
+  }
+
+  const clientId = 'THE-APEX-INVESTOR-TEST-LCWOQ';
+  const clientSecret = 'N4ZHTCrbDRlaMdCrvWdStY8lgMMjy3mT7Jnr3x2MJROMjr7RkX';
 
   try {
-    console.log('Registering user with userId:', userId);
-    const registerResponse = await axios.get(`${BASE_URL}/snaptrade/registerUser`, {
-      params: { userId },
-      headers: { clientId: CLIENT_ID, consumerKey: CONSUMER_KEY }
-    });
-    console.log('User registration response:', registerResponse.data);
+    const snapRes = await fetch(
+      `https://api.snaptrade.com/api/v1/snapTrade/connectionPortal?userId=${userId}&userSecret=${userSecret}`,
+      {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'X-Client-Id': clientId,
+          'X-Client-Secret': clientSecret
+        }
+      }
+    );
 
-    console.log('Requesting login URL...');
-    const loginResponse = await axios.get(`${BASE_URL}/snaptrade/login`, {
-      params: { userId, redirectURI: 'https://theapexinvestor.net/linked' },
-      headers: { clientId: CLIENT_ID, consumerKey: CONSUMER_KEY },
-    });
-    console.log('Login response data:', loginResponse.data);
+    const raw = await snapRes.text();
+    let data;
 
-    return {
-      statusCode: 200,
-      body: JSON.stringify({ url: loginResponse.data.url, userId }),
-    };
+    try {
+      data = JSON.parse(raw);
+    } catch (err) {
+      return res.status(500).json({ error: 'SnapTrade returned non-JSON response', raw });
+    }
+
+    if (snapRes.ok && data.redirectURI) {
+      return res.status(200).json({ url: data.redirectURI });
+    } else {
+      return res.status(400).json({ error: data.error || 'No redirect URI returned', raw });
+    }
+
   } catch (err) {
-    console.error('Error linking portfolio:', err.response ? err.response.data : err.message);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        error: 'Link failed',
-        details: err.response ? err.response.data : err.message,
-      }),
-    };
+    return res.status(500).json({ error: 'Server error', message: err.message });
   }
-};
+}

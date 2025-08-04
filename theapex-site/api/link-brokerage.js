@@ -9,8 +9,8 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Missing userId or userSecret' });
   }
 
-  const clientId = 'THE-APEX-INVESTOR-HGGAU';
-  const clientSecret = '4ILnH7k8kmAeKerCAAQ6W6IPUPPn4a0pohW9qTE12L32g4Sx8f';
+  const clientId = 'THE-APEX-INVESTOR-TEST-LCWOQ';
+  const clientSecret = '72WPHVYJ0bzpoUk0xbC5YEY0pJUfqN0nN6AMFkWP5en7afwMOI';
 
   try {
     const snapRes = await fetch(`https://api.snaptrade.com/api/v1/snapTrade/connectionPortal?userId=${encodeURIComponent(userId)}&userSecret=${encodeURIComponent(userSecret)}`, {

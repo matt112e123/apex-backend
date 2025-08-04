@@ -2648,46 +2648,41 @@ try {
         }
     </script>
 
+
 <script>
   async function connectBroker() {
-    const userId = 'THE-APEX-INVESTOR-USER-5';
-    const userSecret = '5088d1fd-6fec-459b-8001-00fbd02cf46b';
+    const userId = 'THE-APEX-INVESTOR-USER-10';
+    const userSecret = '8d7839d0-87da-419b-9048-42b4dd484c11';
 
     try {
-      const backendUrl = 'https://apex-backend-lovat.vercel.app/api/link-brokerage';
-
-      const response = await fetch(backendUrl, {
-        method: 'POST', // <--- CHANGED: Specify POST method
+      const response = await fetch('https://apex-backend-atqxi8g10-ms-projects-95c3c5e2.vercel.app/api/link-brokerage', {
+        method: 'POST',
         headers: {
-          'Content-Type': 'application/json' // <--- CHANGED: Set content type to JSON
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
-        body: JSON.stringify({ // <--- CHANGED: Send data as JSON in the body
-          userId: userId,
-          userSecret: userSecret
-        })
+        body: JSON.stringify({ userId, userSecret })
       });
 
       const result = await response.json();
       console.log('✅ Backend response:', result);
 
-      if (response.ok) { // Check if the response status is in the 200-299 range
-        if (result.url) {
-          window.location.href = result.url;
-        } else {
-          // If no URL but response was OK, maybe a success message is expected
-          alert(result.message || 'Broker connection successful, but no redirect URL received.');
-        }
+      if (response.ok && result.url) {
+        window.location.href = result.url;
       } else {
-        // Handle non-OK responses (e.g., 400, 401, 500)
-        console.error('❌ Backend error response:', result);
-        alert(result.error || result.message || 'An unexpected error occurred while connecting your broker. Check console for details.');
+        alert(result.error || 'No redirect URL');
       }
     } catch (error) {
-      console.error('❌ Error during fetch:', error);
-      alert('An unexpected error occurred while connecting your broker.');
+      console.error('❌ Fetch error:', error);
+      alert('Network or parsing error.');
     }
   }
 </script>
+
+
+
+
+
 
 
 
