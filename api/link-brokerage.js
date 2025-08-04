@@ -1,37 +1,31 @@
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', 'https://theapexinvestor.com');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Method Not Allowed. Use GET' });
   }
 
-  const { userId, userSecret } = req.method === 'GET' ? req.query : req.body;
+  const { userId, userSecret } = req.query;
 
   if (!userId || !userSecret) {
     return res.status(400).json({ error: 'Missing userId or userSecret' });
   }
 
   const clientId = 'THE-APEX-INVESTOR-TEST-LCWOQ';
-  const clientSecret = 'N4ZHTCrbDRlaMdCrvWdStY8lgMMjy3mT7Jnr3x2MJROMjr7RkX';
+  const clientSecret = '72WPHVYJ0bzpoUk0xbC5YEY0pJUfqN0nN6AMFkWP5en7afwMOI';
 
   try {
-    const snapRes = await fetch(
-      `https://api.snaptrade.com/api/v1/snapTrade/connectionPortal?userId=${userId}&userSecret=${userSecret}`,
-      {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-          'X-Client-Id': clientId,
-          'X-Client-Secret': clientSecret
-        }
+    const snapRes = await fetch(`https://api.snaptrade.com/api/v1/snapTrade/connectionPortal?userId=${encodeURIComponent(userId)}&userSecret=${encodeURIComponent(userSecret)}`, {
+      method: 'GET',
+      headers: {
+        'accept': 'application/json',
+        'X-SnapTrade-Client-Id': clientId,
+        'X-SnapTrade-Client-Secret': clientSecret
       }
-    );
+    });
 
     const raw = await snapRes.text();
-    let data;
+    console.log('📄 SnapTrade raw response:', raw);
 
+    let data;
     try {
       data = JSON.parse(raw);
     } catch (err) {
@@ -45,6 +39,7 @@ export default async function handler(req, res) {
     }
 
   } catch (err) {
+    console.error('❌ SnapTrade fetch error:', err);
     return res.status(500).json({ error: 'Server error', message: err.message });
   }
 }
