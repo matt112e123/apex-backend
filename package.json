@@ -1,10 +1,9 @@
 {
   "name": "apex-backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "index.js",
   "scripts": {
-    "start": "node server.js",
-    "serve": "firebase emulators:start"
+    "start": "node index.js"
   },
   "dependencies": {
     "@dataconnect/generated": "file:src/dataconnect-generated",
