@@ -1,6 +1,10 @@
 const express = require('express');
 const app = express();
 
+app.get('/', (req, res) => {
+  res.send('API is running! Welcome to apex-backend! Try /oauth/callback/schwab');
+});
+
 app.get('/oauth/callback/schwab', (req, res) => {
   const code = req.query.code;
   console.log("Schwab Callback HIT!", code);
